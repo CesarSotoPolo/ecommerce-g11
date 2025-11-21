@@ -1,6 +1,8 @@
-import React from 'react'
-import ProductCard from '../ui/ProductCard'
+import { useState } from 'react';
+import ProductCard from '../ui/ProductCard';
+import useGetAxios from '../../hooks/useGetAxios';
 
+/*
 const MOCK_PRODUCTS = [
   {
     id: 1,
@@ -36,8 +38,29 @@ const MOCK_PRODUCTS = [
     categoriaId: 3,
   },
 ]
+*/
 
 const HomeView = () => {
+  const [page, setPage] = useState(1);
+  //los custom Hook tienen que usarse dentro de un componente
+  const { data, error } = useGetAxios(`https://simple-api-2ivd.onrender.com/productos?page=${page}&limit=9`);
+
+  console.log(data);
+  //buscamos en la respuesta de la api totalPages
+  const totalPages = data?.meta?.totalPages;
+
+  const previousPage = () => {
+    if(page > 1) { //previniendo que sea un 1 - 1
+      setPage(page - 1)
+    }
+  }
+
+  const nextPage = () => {
+    if(page < totalPages){ //si es menor a totalPages aumentamos + 1
+      setPage(page + 1);
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-3 md:px-6 py-6">
       <div className="hero bg-base-200 rounded-box">
@@ -55,9 +78,23 @@ const HomeView = () => {
 
       <h2 className="mt-8 mb-4 text-xl font-semibold">Destacados</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {MOCK_PRODUCTS.map((p) => (
+        {/* operador de encadenamiento opcional */}
+        {/* validamos que la propiedad productos exista, recodermos que data originalmente es null */}
+        {/* aplicamos un renderizado de listas para mostrar los productos de la API */}
+        {data?.productos && data.productos.map((p) => (
           <ProductCard key={p.id} producto={p} />
         ))}
+      </div>
+      {/* botones paginación */}
+      <div className='flex justify-between mt-6'>
+        <button
+        className='btn btn-primary' onClick={previousPage}>
+          Página Previa
+        </button>
+        <button
+        className='btn btn-primary' onClick={nextPage}>
+          Página Siguiente
+        </button>
       </div>
     </div>
   )
